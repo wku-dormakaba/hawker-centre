@@ -1,5 +1,4 @@
 import Head from 'next/head'
-import Image from 'next/image'
 import styles from '../styles/Home.module.css'
 
 import axios from 'axios';
@@ -10,6 +9,11 @@ import customParseFormat from 'dayjs/plugin/customParseFormat';
 dayjs.extend(customParseFormat)
 import isBetween from 'dayjs/plugin/isBetween';
 dayjs.extend(isBetween)
+import utc from 'dayjs/plugin/utc'
+import timezone from 'dayjs/plugin/timezone' // dependent on utc plugin
+dayjs.extend(utc)
+dayjs.extend(timezone)
+dayjs.tz.setDefault('Asia/Singapore')
 
 const getQuarter = d => {
   const day = dayjs(d, 'D/M/YYYY')
@@ -18,7 +22,8 @@ const getQuarter = d => {
 
 const isDate = d => d.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/) ? true : false;
 
-const today = dayjs();
+const today = dayjs().tz();
+const nextWeek = today.add(1, 'week');
 
 export default function Home({ closed, upcoming }) {
   return (
@@ -30,7 +35,7 @@ export default function Home({ closed, upcoming }) {
       </Head>
 
       <main>
-        <h2>Closed today ({today.format('DD MMM YYYY')})</h2>
+        <h2>Closed today ({today.format('DD MMM')})</h2>
         {closed.map(hc => <p key={hc}>{hc}</p>)}
         <hr />
         <h3>Upcoming</h3>
@@ -41,32 +46,32 @@ export default function Home({ closed, upcoming }) {
 }
 
 export async function getStaticProps() {
-  const { data: { result: { fields, records } } } = await axios.get('https://data.gov.sg/api/action/datastore_search?resource_id=b80cb643-a732-480d-86b5-e03957bc82aa');
+  const { data: { result: { records } } } = await axios.get('https://data.gov.sg/api/action/datastore_search?resource_id=b80cb643-a732-480d-86b5-e03957bc82aa');
 
   const q = getQuarter(dayjs().format('D/M/YYYY'))
   const upcoming = []
   const closed = records.map(r => {
     if (isDate(r[`${q}_cleaningstartdate`])) {
-      const cleaningstartdate = dayjs(r[`${q}_cleaningstartdate`], 'D/M/YYYY')
-      const cleaningenddate = dayjs(r[`${q}_cleaningenddate`], 'D/M/YYYY')
+      const cleaningstartdate = dayjs(r[`${q}_cleaningstartdate`], 'D/M/YYYY').tz()
+      const cleaningenddate = dayjs(r[`${q}_cleaningenddate`], 'D/M/YYYY').tz()
       if (today.isBetween(cleaningstartdate, cleaningenddate, 'day', '[]')) {
-        return `${r.name} (${r[`remarks_${q}`] === 'nil' ? `Cleaning, end ${cleaningenddate.format('ddd DD MMM YYYY')}` : r[`remarks_${q}`]})`
+        return `${r.name} (${r[`remarks_${q}`] === 'nil' ? `Cleaning, end ${cleaningenddate.format('ddd DD MMM')}` : r[`remarks_${q}`]})`
       }
 
-      if (today.add(1, 'week').isBetween(cleaningstartdate, cleaningenddate, 'day', '[]')) {
-        upcoming.push(`${r.name} (${r[`remarks_${q}`] === 'nil' ? `Cleaning, start ${cleaningstartdate.format('ddd DD MMM YYYY')}` : r[`remarks_${q}`]})`)
+      if (cleaningstartdate.isAfter(today) && cleaningstartdate.isBefore(nextWeek)) {
+        upcoming.push(`${r.name} (${r[`remarks_${q}`] === 'nil' ? `Cleaning, start ${cleaningstartdate.format('ddd DD MMM')}` : r[`remarks_${q}`]})`)
       }
     }
 
     if (r.remarks_other_works !== 'nil') {
-      const other_works_startdate = dayjs(r.other_works_startdate, 'D/M/YYYY')
-      const other_works_enddate = dayjs(r.other_works_enddate, 'D/M/YYYY')
+      const other_works_startdate = dayjs(r.other_works_startdate, 'D/M/YYYY').tz()
+      const other_works_enddate = dayjs(r.other_works_enddate, 'D/M/YYYY').tz()
       if (today.isBetween(other_works_startdate, other_works_enddate, 'day', '[]')) {
-        return `${r.name} (${r.remarks_other_works}, end ${other_works_enddate.format('ddd DD MMM YYYY')})`
+        return `${r.name} (${r.remarks_other_works}, end ${other_works_enddate.format('ddd DD MMM')})`
       }
 
-      if (today.add(1, 'week').isBetween(other_works_startdate, other_works_enddate, 'day', '[]')) {
-        upcoming.push(`${r.name} (${r.remarks_other_works}, start ${other_works_startdate.format('ddd DD MMM YYYY')})`)
+      if (other_works_startdate.isAfter(today) && other_works_startdate.isBefore(nextWeek)) {
+        upcoming.push(`${r.name} (${r.remarks_other_works}, start ${other_works_startdate.format('ddd DD MMM')})`)
       }
     }
 
