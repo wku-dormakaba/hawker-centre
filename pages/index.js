@@ -22,7 +22,7 @@ const getQuarter = d => {
 
 const isDate = d => d.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/) ? true : false;
 
-const today = dayjs().tz();
+const today = dayjs().tz().startOf('day');
 const nextWeek = today.add(1, 'week');
 
 export default function Home({ closed, upcoming }) {
