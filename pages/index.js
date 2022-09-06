@@ -57,7 +57,7 @@ export async function getStaticProps() {
       const cleaningstartdate = dayjs(r[`${q}_cleaningstartdate`], 'D/M/YYYY').tz().startOf('day')
       const cleaningenddate = dayjs(r[`${q}_cleaningenddate`], 'D/M/YYYY').tz().endOf('day')
       if (today.isBetween(cleaningstartdate, cleaningenddate, 'day', '[]')) {
-        return `${r.name} (${r[`remarks_${q}`] === 'nil' ? `Cleaning, end ${cleaningenddate.format('ddd DD MMM')} ~ ${cleaningenddate.from(cleaningstartdate)}` : r[`remarks_${q}`]})`
+        return `${r.name} (${r[`remarks_${q}`] === 'nil' ? `Cleaning, end ${cleaningenddate.format('ddd DD MMM')} ~ ${cleaningenddate.from(today)}` : r[`remarks_${q}`]})`
       }
 
       if (cleaningstartdate.isAfter(today) && cleaningstartdate.isBefore(nextWeek)) {
@@ -69,11 +69,11 @@ export async function getStaticProps() {
       const other_works_startdate = dayjs(r.other_works_startdate, 'D/M/YYYY').tz().startOf('day')
       const other_works_enddate = dayjs(r.other_works_enddate, 'D/M/YYYY').tz().endOf('day')
       if (today.isBetween(other_works_startdate, other_works_enddate, 'day', '[]')) {
-        return `${r.name} (${r.remarks_other_works}, end ${other_works_enddate.format('ddd DD MMM')} ~ ${other_works_enddate.from(other_works_startdate)})`
+        return `${r.name} (${r.remarks_other_works}, end ${other_works_enddate.format('ddd DD MMM')} ~ ${other_works_enddate.from(today)})`
       }
 
       if (other_works_startdate.isAfter(today) && other_works_startdate.isBefore(nextWeek)) {
-        upcoming.push(`${r.name} (${r.remarks_other_works}, start ${other_works_startdate.format('ddd DD MMM')})`)
+        upcoming.push(`${r.name} (${r.remarks_other_works}, start ${other_works_startdate.format('ddd DD MMM')} ~ ${other_works_startdate.from(today)})`)
       }
     }
 
