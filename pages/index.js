@@ -14,6 +14,8 @@ import timezone from 'dayjs/plugin/timezone' // dependent on utc plugin
 dayjs.extend(utc)
 dayjs.extend(timezone)
 dayjs.tz.setDefault('Asia/Singapore')
+import relativeTime from 'dayjs/plugin/relativeTime'
+dayjs.extend(relativeTime)
 
 const getQuarter = d => {
   const day = dayjs(d, 'D/M/YYYY')
@@ -38,7 +40,7 @@ export default function Home({ closed, upcoming }) {
         <h2>Closed today ({today.format('DD MMM')})</h2>
         {closed.map(hc => <p key={hc}>{hc}</p>)}
         <hr />
-        <h3>Upcoming</h3>
+        <h4>Upcoming ...</h4>
         {upcoming.map(hc => <p key={hc}>{hc}</p>)}
       </main>
     </div>
@@ -52,22 +54,22 @@ export async function getStaticProps() {
   const upcoming = []
   const closed = records.map(r => {
     if (isDate(r[`${q}_cleaningstartdate`])) {
-      const cleaningstartdate = dayjs(r[`${q}_cleaningstartdate`], 'D/M/YYYY').tz()
-      const cleaningenddate = dayjs(r[`${q}_cleaningenddate`], 'D/M/YYYY').tz()
+      const cleaningstartdate = dayjs(r[`${q}_cleaningstartdate`], 'D/M/YYYY').tz().startOf('day')
+      const cleaningenddate = dayjs(r[`${q}_cleaningenddate`], 'D/M/YYYY').tz().endOf('day')
       if (today.isBetween(cleaningstartdate, cleaningenddate, 'day', '[]')) {
-        return `${r.name} (${r[`remarks_${q}`] === 'nil' ? `Cleaning, end ${cleaningenddate.format('ddd DD MMM')}` : r[`remarks_${q}`]})`
+        return `${r.name} (${r[`remarks_${q}`] === 'nil' ? `Cleaning, end ${cleaningenddate.format('ddd DD MMM')} ~ ${cleaningenddate.from(cleaningstartdate)}` : r[`remarks_${q}`]})`
       }
 
       if (cleaningstartdate.isAfter(today) && cleaningstartdate.isBefore(nextWeek)) {
-        upcoming.push(`${r.name} (${r[`remarks_${q}`] === 'nil' ? `Cleaning, start ${cleaningstartdate.format('ddd DD MMM')}` : r[`remarks_${q}`]})`)
+        upcoming.push(`${r.name} (${r[`remarks_${q}`] === 'nil' ? `Cleaning, start ${cleaningstartdate.format('ddd DD MMM')} ~ ${cleaningstartdate.from(today)}` : r[`remarks_${q}`]})`)
       }
     }
 
     if (r.remarks_other_works !== 'nil') {
-      const other_works_startdate = dayjs(r.other_works_startdate, 'D/M/YYYY').tz()
-      const other_works_enddate = dayjs(r.other_works_enddate, 'D/M/YYYY').tz()
+      const other_works_startdate = dayjs(r.other_works_startdate, 'D/M/YYYY').tz().startOf('day')
+      const other_works_enddate = dayjs(r.other_works_enddate, 'D/M/YYYY').tz().endOf('day')
       if (today.isBetween(other_works_startdate, other_works_enddate, 'day', '[]')) {
-        return `${r.name} (${r.remarks_other_works}, end ${other_works_enddate.format('ddd DD MMM')})`
+        return `${r.name} (${r.remarks_other_works}, end ${other_works_enddate.format('ddd DD MMM')} ~ ${other_works_enddate.from(other_works_startdate)})`
       }
 
       if (other_works_startdate.isAfter(today) && other_works_startdate.isBefore(nextWeek)) {
