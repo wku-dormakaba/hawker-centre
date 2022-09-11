@@ -28,8 +28,6 @@ const today = dayjs.tz().startOf('day');
 const nextWeek = today.add(1, 'week');
 
 export default function Home({ closed, upcoming }) {
-  const timezone = dayjs.tz.guess()
-  console.log(timezone, dayjs().tz(), today)
   return (
     <div className={styles.container}>
       <Head>
@@ -39,7 +37,6 @@ export default function Home({ closed, upcoming }) {
       </Head>
 
       <main>
-        <p>{timezone}</p>
         <h2>Closed today ({today.format('DD MMM')})</h2>
         {closed.map(hc => <p key={hc}>{hc}</p>)}
         <hr />
