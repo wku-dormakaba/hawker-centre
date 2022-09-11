@@ -57,8 +57,8 @@ export async function getStaticProps() {
   const upcoming = []
   const closed = records.map(r => {
     if (isDate(r[`${q}_cleaningstartdate`])) {
-      const cleaningstartdate = dayjs(r[`${q}_cleaningstartdate`], 'D/M/YYYY').tz()
-      const cleaningenddate = dayjs(r[`${q}_cleaningenddate`], 'D/M/YYYY').tz()
+      const cleaningstartdate = dayjs(r[`${q}_cleaningstartdate`], 'D/M/YYYY').tz().startOf('day')
+      const cleaningenddate = dayjs(r[`${q}_cleaningenddate`], 'D/M/YYYY').tz().endOf('day')
       if (today.isBetween(cleaningstartdate, cleaningenddate, 'day', '[]')) {
         return `${r.name} (${r[`remarks_${q}`] === 'nil' ? `Cleaning, end ${cleaningenddate.format('ddd DD MMM')} ~ ${cleaningenddate.from(today)}` : r[`remarks_${q}`]})`
       }
@@ -69,8 +69,8 @@ export async function getStaticProps() {
     }
 
     if (r.remarks_other_works !== 'nil') {
-      const other_works_startdate = dayjs(r.other_works_startdate, 'D/M/YYYY').tz()
-      const other_works_enddate = dayjs(r.other_works_enddate, 'D/M/YYYY').tz()
+      const other_works_startdate = dayjs(r.other_works_startdate, 'D/M/YYYY').tz().startOf('day')
+      const other_works_enddate = dayjs(r.other_works_enddate, 'D/M/YYYY').tz().endOf('day')
       if (today.isBetween(other_works_startdate, other_works_enddate, 'day', '[]')) {
         return `${r.name} (${r.remarks_other_works}, end ${other_works_enddate.format('ddd DD MMM')} ~ ${other_works_enddate.from(today)})`
       }
