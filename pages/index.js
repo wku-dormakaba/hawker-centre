@@ -24,9 +24,6 @@ const getQuarter = d => {
 
 const isDate = d => d.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/) ? true : false;
 
-const today = dayjs.tz().startOf('day');
-const nextWeek = today.add(1, 'week');
-
 export default function Home({ closed, upcoming }) {
   return (
     <div className={styles.container}>
@@ -37,7 +34,7 @@ export default function Home({ closed, upcoming }) {
       </Head>
 
       <main>
-        <h2>Closed today ({today.format('DD MMM')})</h2>
+        <h2>Closed today ({dayjs.tz().format('DD MMM')})</h2>
         {closed.map(hc => <p key={hc}>{hc}</p>)}
         <hr />
         <h4>Upcoming ...</h4>
@@ -49,6 +46,8 @@ export default function Home({ closed, upcoming }) {
 
 export async function getStaticProps() {
   const { data: { result: { records } } } = await axios.get('https://data.gov.sg/api/action/datastore_search?resource_id=b80cb643-a732-480d-86b5-e03957bc82aa');
+  const today = dayjs.tz().startOf('day');
+  const nextWeek = today.add(1, 'week');
 
   const q = getQuarter(today.format('D/M/YYYY'))
   const upcoming = []
