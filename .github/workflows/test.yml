@@ -19,8 +19,7 @@ jobs:
       # Runs a single command using the runners shell
       - name: Run a one-line script
         env:
-          URL: ${{ secrets.SECRET_DEPLOY_HOOK }}
-          TEST_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          URL: ${{ secrets.DEPLOY_HOOK }}
         run: |
-          echo $TEST_GITHUB_TOKEN
-          echo $URL        
+          echo $URL
+          echo ${{ secrets.DEPLOY_HOOK }}
