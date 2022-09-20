@@ -22,5 +22,5 @@ jobs:
           URL: ${{ secrets.SECRET_DEPLOY_HOOK }}
           TEST_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo ${#TEST_GITHUB_TOKEN}
-          echo ${#URL}        
+          echo $TEST_GITHUB_TOKEN
+          echo $URL        
