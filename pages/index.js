@@ -44,7 +44,7 @@ export default function Home({ closed, upcoming }) {
   )
 }
 
-export async function getStaticProps() {
+export async function getServerSideProps() {
   const { data: { result: { records } } } = await axios.get('https://data.gov.sg/api/action/datastore_search?resource_id=b80cb643-a732-480d-86b5-e03957bc82aa');
   const today = dayjs.tz().startOf('day');
   const nextWeek = today.add(1, 'week');
